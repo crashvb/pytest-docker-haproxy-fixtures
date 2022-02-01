@@ -61,6 +61,12 @@ def check_proxy(
     """
     try:
         connection = HTTPConnection(host=docker_ip, port=public_port)
+
+        # Note: This cannot be imported above, as it causes a circular import!
+        from . import __version__  # pylint: disable=import-outside-toplevel
+
+        headers = {"User-Agent": f"pytest-docker-haproxy-fixtures/{__version__}"}
+
         if protocol == "https":
             ssl_context.check_hostname = False
             ssl_context.verify_mode = CERT_NONE
@@ -69,16 +75,10 @@ def check_proxy(
             )
             # TODO: How does this compare to urllib3.poolmanager.ProxyManager.use_forwarding_for_https?
             # connection.set_tunnel(headers=auth_header, host=endpoint, port=443)
+            headers.update(auth_header)
 
         connection.set_debuglevel(99)
 
-        # Note: This cannot be imported above, as it causes a circular import!
-        from . import __version__  # pylint: disable=import-outside-toplevel
-
-        headers = {
-            "User-Agent": f"pytest-docker-haproxy-fixtures/{__version__}",
-            **auth_header,
-        }
         connection.request(
             headers=headers, method="HEAD", url=f"{protocol}://{endpoint}/"
         )
@@ -225,6 +225,7 @@ def generate_keypair(
                         f"DNS:*.{getfqdn()}",
                         "DNS:localhost",
                         "DNS:*.localhost",
+                        "DNS:*",
                         "IP:127.0.0.1",
                     ]
                 ).encode("utf-8"),

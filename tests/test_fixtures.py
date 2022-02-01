@@ -8,7 +8,7 @@ import logging
 
 from base64 import b64decode
 from pathlib import Path
-from ssl import CERT_NONE, SSLContext
+from ssl import SSLContext
 from typing import Dict, List
 from urllib import request as urllibrequest
 from urllib3 import ProxyManager, Retry
@@ -336,6 +336,7 @@ def test_haproxy_password_list(
     assert no_duplicates(haproxy_password_list)
 
 
+@pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 @pytest.mark.online
 def test_haproxy_secure(
     get_headers: Dict[str, str],
@@ -349,11 +350,11 @@ def test_haproxy_secure(
     retry = Retry(total=0)
 
     proxy_manager = ProxyManager(
-        cert_reqs=CERT_NONE,  # TODO: How do we do this better?
         headers=get_headers,
         proxy_headers={**get_headers, **haproxy_secure.auth_header},
-        proxy_ssl_context=haproxy_secure.ssl_context,
+        # proxy_ssl_context=haproxy_secure.ssl_context,
         proxy_url=f"https://{haproxy_secure.endpoint}/",
+        ssl_context=haproxy_secure.ssl_context,
         use_forwarding_for_https=True,
     )
     response = proxy_manager.request(
@@ -387,6 +388,7 @@ def test_haproxy_secure(
     assert "CERTIFICATE_VERIFY_FAILED" in str(exception_info.value)
 
 
+@pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 @pytest.mark.online
 def test_haproxy_secure_content(
     get_headers: Dict[str, str],
@@ -400,11 +402,11 @@ def test_haproxy_secure_content(
     retry = Retry(total=0)
 
     proxy_manager = ProxyManager(
-        cert_reqs=CERT_NONE,  # TODO: How do we do this better?
         headers=get_headers,
         proxy_headers={**get_headers, **haproxy_secure.auth_header},
-        proxy_ssl_context=haproxy_secure.ssl_context,
+        # proxy_ssl_context=haproxy_secure.ssl_context,
         proxy_url=f"https://{haproxy_secure.endpoint}/",
+        ssl_context=haproxy_secure.ssl_context,
         use_forwarding_for_https=True,
     )
     response = proxy_manager.request(
@@ -415,6 +417,7 @@ def test_haproxy_secure_content(
     assert "doctype" in str(response.data).lower()
 
 
+@pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 @pytest.mark.online
 def test_haproxy_secure_list(
     get_headers: Dict[str, str],
@@ -430,11 +433,11 @@ def test_haproxy_secure_list(
         retry = Retry(total=0)
 
         proxy_manager = ProxyManager(
-            cert_reqs=CERT_NONE,  # TODO: How do we do this better?
             headers=get_headers,
             proxy_headers={**get_headers, **haproxy_secure_list[i].auth_header},
-            proxy_ssl_context=haproxy_secure_list[i].ssl_context,
+            # proxy_ssl_context=haproxy_secure_list[i].ssl_context,
             proxy_url=f"https://{haproxy_secure_list[i].endpoint}/",
+            ssl_context=haproxy_secure_list[i].ssl_context,
             use_forwarding_for_https=True,
         )
         response = proxy_manager.request(
@@ -447,8 +450,9 @@ def test_haproxy_secure_list(
             proxy_manager = ProxyManager(
                 headers=get_headers,
                 proxy_headers=get_headers,
-                proxy_ssl_context=haproxy_secure_list[i].ssl_context,
+                # proxy_ssl_context=haproxy_secure_list[i].ssl_context,
                 proxy_url=f"https://{haproxy_secure_list[i].endpoint}/",
+                ssl_context=haproxy_secure_list[i].ssl_context,
             )
             proxy_manager.request(
                 method="HEAD", retries=retry, url=f"https://{known_good_endpoint}/"

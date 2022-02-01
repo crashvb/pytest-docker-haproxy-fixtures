@@ -1,0 +1,43 @@
+#!/usr/bin/env docker-compose
+
+version: "3"
+services:
+  pytest-haproxy-insecure: &pytest-haproxy-insecure
+    container_name: $CONTAINER_NAME
+    image: library/haproxy:2.5.1
+    ports:
+    - "8080/tcp"
+    volumes:
+    - "$PATH_HAPROXYCFG:/usr/local/etc/haproxy/haproxy.cfg:ro"
+  pytest-haproxy-secure: &pytest-haproxy-secure
+    container_name: $CONTAINER_NAME
+    image: library/haproxy:2.5.1
+    ports:
+    - "8080/tcp"
+    volumes:
+    - "$PATH_HAPROXYCFG:/usr/local/etc/haproxy/haproxy.cfg:ro"
+    - "$PATH_CERTIFICATE:/pytest-haproxy.crt:ro"
+    - "$PATH_KEY:/pytest-haproxy.crt.key:ro"
+
+  # If more than 10 are needed, or they need to be asymmetric, or whatever ...
+  # ... override docker-compose.yml or the corresponding fixture downstream ;)
+  pytest-haproxy-insecure-0: *pytest-haproxy-insecure
+  pytest-haproxy-insecure-1: *pytest-haproxy-insecure
+  pytest-haproxy-insecure-2: *pytest-haproxy-insecure
+  pytest-haproxy-insecure-3: *pytest-haproxy-insecure
+  pytest-haproxy-insecure-4: *pytest-haproxy-insecure
+  pytest-haproxy-insecure-5: *pytest-haproxy-insecure
+  pytest-haproxy-insecure-6: *pytest-haproxy-insecure
+  pytest-haproxy-insecure-7: *pytest-haproxy-insecure
+  pytest-haproxy-insecure-8: *pytest-haproxy-insecure
+  pytest-haproxy-insecure-9: *pytest-haproxy-insecure
+  pytest-haproxy-secure-0: *pytest-haproxy-secure
+  pytest-haproxy-secure-1: *pytest-haproxy-secure
+  pytest-haproxy-secure-2: *pytest-haproxy-secure
+  pytest-haproxy-secure-3: *pytest-haproxy-secure
+  pytest-haproxy-secure-4: *pytest-haproxy-secure
+  pytest-haproxy-secure-5: *pytest-haproxy-secure
+  pytest-haproxy-secure-6: *pytest-haproxy-secure
+  pytest-haproxy-secure-7: *pytest-haproxy-secure
+  pytest-haproxy-secure-8: *pytest-haproxy-secure
+  pytest-haproxy-secure-9: *pytest-haproxy-secure

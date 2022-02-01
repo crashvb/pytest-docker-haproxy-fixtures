@@ -70,136 +70,6 @@ class HAProxySecure(NamedTuple):
     username: str
 
 
-def _docker_compose_insecure(
-    *,
-    docker_compose_files: List[str],
-    scale_factor: int,
-    tmp_path_factory: TempPathFactory,
-) -> Generator[List[Path], None, None]:
-    """
-    Provides the location of the docker-compose configuration file containing the insecure haproxy service.
-    """
-    cache_key = _docker_compose_insecure.__name__
-    result = CACHE.get(cache_key, [])
-    for i in range(scale_factor):
-        if i < len(result):
-            continue
-
-        service_name = HAPROXY_SERVICE_PATTERN.format("insecure", i)
-        chain = itertools.chain(
-            get_docker_compose_user_defined(docker_compose_files, service_name),
-            # TODO: lovely-docker-compose uses the file for teardown ...
-            get_embedded_file(
-                tmp_path_factory, delete_after=False, name="docker-compose.yml"
-            ),
-        )
-        for path in chain:
-            result.append(path)
-            break
-        else:
-            LOGGER.warning("Unable to find docker compose for: %s", service_name)
-            result.append("-unknown-")
-    CACHE[cache_key] = result
-    yield result
-
-
-@pytest.fixture(scope="session")
-def docker_compose_insecure(
-    docker_compose_files: List[str], tmp_path_factory: TempPathFactory
-) -> Generator[Path, None, None]:
-    """
-    Provides the location of the docker-compose configuration file containing the insecure haproxy service.
-    """
-    for lst in _docker_compose_insecure(
-        docker_compose_files=docker_compose_files,
-        scale_factor=1,
-        tmp_path_factory=tmp_path_factory,
-    ):
-        yield lst[0]
-
-
-@pytest.fixture(scope="session")
-def docker_compose_insecure_list(
-    docker_compose_files: List[str],
-    pdhf_scale_factor: int,
-    tmp_path_factory: TempPathFactory,
-) -> Generator[List[Path], None, None]:
-    """
-    Provides the location of the docker-compose configuration file containing the insecure haproxy service.
-    """
-    yield from _docker_compose_insecure(
-        docker_compose_files=docker_compose_files,
-        scale_factor=pdhf_scale_factor,
-        tmp_path_factory=tmp_path_factory,
-    )
-
-
-def _docker_compose_secure(
-    *,
-    docker_compose_files: List[str],
-    scale_factor: int,
-    tmp_path_factory: TempPathFactory,
-) -> Generator[List[Path], None, None]:
-    """
-    Provides the location of the templated docker-compose configuration file containing the secure haproxy
-    service.
-    """
-    cache_key = _docker_compose_secure.__name__
-    result = CACHE.get(cache_key, [])
-    for i in range(scale_factor):
-        if i < len(result):
-            continue
-
-        service_name = HAPROXY_SERVICE_PATTERN.format("secure", i)
-        chain = itertools.chain(
-            get_docker_compose_user_defined(docker_compose_files, service_name),
-            get_embedded_file(
-                tmp_path_factory, delete_after=False, name="docker-compose.yml"
-            ),
-        )
-        for path in chain:
-            result.append(path)
-            break
-        else:
-            LOGGER.warning("Unable to find docker compose for: %s", service_name)
-            result.append("-unknown-")
-    CACHE[cache_key] = result
-    yield result
-
-
-@pytest.fixture(scope="session")
-def docker_compose_secure(
-    docker_compose_files: List[str], tmp_path_factory: TempPathFactory
-) -> Generator[Path, None, None]:
-    """
-    Provides the location of the templated docker-compose configuration file containing the secure haproxy
-    service.
-    """
-    for lst in _docker_compose_secure(
-        docker_compose_files=docker_compose_files,
-        scale_factor=1,
-        tmp_path_factory=tmp_path_factory,
-    ):
-        yield lst[0]
-
-
-@pytest.fixture(scope="session")
-def docker_compose_secure_list(
-    docker_compose_files: List[str],
-    pdhf_scale_factor: int,
-    tmp_path_factory: TempPathFactory,
-) -> Generator[List[Path], None, None]:
-    """
-    Provides the location of the templated docker-compose configuration file containing the secure haproxy
-    service.
-    """
-    yield from _docker_compose_secure(
-        docker_compose_files=docker_compose_files,
-        scale_factor=pdhf_scale_factor,
-        tmp_path_factory=tmp_path_factory,
-    )
-
-
 def _haproxy_auth_header(
     *,
     haproxy_password_list: List[str],
@@ -556,14 +426,14 @@ def _haproxy_insecure(
 
 @pytest.fixture(scope="session")
 def haproxy_insecure(
-    docker_compose_insecure: Path,
     docker_services: Services,
     haproxy_haproxycfg_insecure: Path,
+    pdhf_docker_compose_insecure: Path,
     tmp_path_factory: TempPathFactory,
 ) -> Generator[HAProxyInsecure, None, None]:
     """Provides the endpoint of a local, insecure, haproxy."""
     for lst in _haproxy_insecure(
-        docker_compose_insecure_list=[docker_compose_insecure],
+        docker_compose_insecure_list=[pdhf_docker_compose_insecure],
         docker_services=docker_services,
         haproxy_haproxycfg_insecure_list=[haproxy_haproxycfg_insecure],
         scale_factor=1,
@@ -574,15 +444,15 @@ def haproxy_insecure(
 
 @pytest.fixture(scope="session")
 def haproxy_insecure_list(
-    docker_compose_insecure_list: List[Path],
     docker_services: Services,
     haproxy_haproxycfg_insecure_list: List[Path],
+    pdhf_docker_compose_insecure_list: List[Path],
     pdhf_scale_factor: int,
     tmp_path_factory: TempPathFactory,
 ) -> Generator[List[HAProxyInsecure], None, None]:
     """Provides the endpoint of a local, insecure, haproxy."""
     yield from _haproxy_insecure(
-        docker_compose_insecure_list=docker_compose_insecure_list,
+        docker_compose_insecure_list=pdhf_docker_compose_insecure_list,
         docker_services=docker_services,
         haproxy_haproxycfg_insecure_list=haproxy_haproxycfg_insecure_list,
         scale_factor=pdhf_scale_factor,
@@ -698,7 +568,7 @@ def _haproxy_secure(
 
 @pytest.fixture(scope="session")
 def haproxy_secure(
-    docker_compose_secure: Path,
+    docker_services: Services,
     haproxy_auth_header,
     haproxy_cacerts: Path,
     haproxy_certs: HAProxyCerts,
@@ -706,12 +576,12 @@ def haproxy_secure(
     haproxy_password: str,
     haproxy_ssl_context: SSLContext,
     haproxy_username: str,
-    docker_services: Services,
+    pdhf_docker_compose_secure: Path,
     tmp_path_factory: TempPathFactory,
 ) -> Generator[HAProxySecure, None, None]:
     """Provides the endpoint of a local, secure, haproxy."""
     for lst in _haproxy_secure(
-        docker_compose_secure_list=[docker_compose_secure],
+        docker_compose_secure_list=[pdhf_docker_compose_secure],
         haproxy_auth_header_list=[haproxy_auth_header],
         haproxy_cacerts_list=[haproxy_cacerts],
         haproxy_certs_list=[haproxy_certs],
@@ -728,7 +598,7 @@ def haproxy_secure(
 
 @pytest.fixture(scope="session")
 def haproxy_secure_list(
-    docker_compose_secure_list: List[Path],
+    docker_services: Services,
     haproxy_auth_header_list,
     haproxy_cacerts_list: List[Path],
     haproxy_certs_list: List[HAProxyCerts],
@@ -736,13 +606,13 @@ def haproxy_secure_list(
     haproxy_password_list: List[str],
     haproxy_ssl_context_list: List[SSLContext],
     haproxy_username_list: List[str],
-    docker_services: Services,
+    pdhf_docker_compose_secure_list: List[Path],
     pdhf_scale_factor: int,
     tmp_path_factory: TempPathFactory,
 ) -> Generator[List[HAProxySecure], None, None]:
     """Provides the endpoint of a local, secure, haproxy."""
     yield from _haproxy_secure(
-        docker_compose_secure_list=docker_compose_secure_list,
+        docker_compose_secure_list=pdhf_docker_compose_secure_list,
         haproxy_auth_header_list=haproxy_auth_header_list,
         haproxy_cacerts_list=haproxy_cacerts_list,
         haproxy_certs_list=haproxy_certs_list,
@@ -826,6 +696,136 @@ def haproxy_username_list(
 ) -> List[str]:
     """Retrieve the name of the user to use for authentication to the secure haproxy service."""
     return _haproxy_username(scale_factor=pdhf_scale_factor)
+
+
+def _pdhf_docker_compose_insecure(
+    *,
+    docker_compose_files: List[str],
+    scale_factor: int,
+    tmp_path_factory: TempPathFactory,
+) -> Generator[List[Path], None, None]:
+    """
+    Provides the location of the docker-compose configuration file containing the insecure haproxy service.
+    """
+    cache_key = _pdhf_docker_compose_insecure.__name__
+    result = CACHE.get(cache_key, [])
+    for i in range(scale_factor):
+        if i < len(result):
+            continue
+
+        service_name = HAPROXY_SERVICE_PATTERN.format("insecure", i)
+        chain = itertools.chain(
+            get_docker_compose_user_defined(docker_compose_files, service_name),
+            # TODO: lovely-docker-compose uses the file for teardown ...
+            get_embedded_file(
+                tmp_path_factory, delete_after=False, name="docker-compose.yml"
+            ),
+        )
+        for path in chain:
+            result.append(path)
+            break
+        else:
+            LOGGER.warning("Unable to find docker compose for: %s", service_name)
+            result.append("-unknown-")
+    CACHE[cache_key] = result
+    yield result
+
+
+@pytest.fixture(scope="session")
+def pdhf_docker_compose_insecure(
+    docker_compose_files: List[str], tmp_path_factory: TempPathFactory
+) -> Generator[Path, None, None]:
+    """
+    Provides the location of the docker-compose configuration file containing the insecure haproxy service.
+    """
+    for lst in _pdhf_docker_compose_insecure(
+        docker_compose_files=docker_compose_files,
+        scale_factor=1,
+        tmp_path_factory=tmp_path_factory,
+    ):
+        yield lst[0]
+
+
+@pytest.fixture(scope="session")
+def pdhf_docker_compose_insecure_list(
+    docker_compose_files: List[str],
+    pdhf_scale_factor: int,
+    tmp_path_factory: TempPathFactory,
+) -> Generator[List[Path], None, None]:
+    """
+    Provides the location of the docker-compose configuration file containing the insecure haproxy service.
+    """
+    yield from _pdhf_docker_compose_insecure(
+        docker_compose_files=docker_compose_files,
+        scale_factor=pdhf_scale_factor,
+        tmp_path_factory=tmp_path_factory,
+    )
+
+
+def _pdhf_docker_compose_secure(
+    *,
+    docker_compose_files: List[str],
+    scale_factor: int,
+    tmp_path_factory: TempPathFactory,
+) -> Generator[List[Path], None, None]:
+    """
+    Provides the location of the templated docker-compose configuration file containing the secure haproxy
+    service.
+    """
+    cache_key = _pdhf_docker_compose_secure.__name__
+    result = CACHE.get(cache_key, [])
+    for i in range(scale_factor):
+        if i < len(result):
+            continue
+
+        service_name = HAPROXY_SERVICE_PATTERN.format("secure", i)
+        chain = itertools.chain(
+            get_docker_compose_user_defined(docker_compose_files, service_name),
+            get_embedded_file(
+                tmp_path_factory, delete_after=False, name="docker-compose.yml"
+            ),
+        )
+        for path in chain:
+            result.append(path)
+            break
+        else:
+            LOGGER.warning("Unable to find docker compose for: %s", service_name)
+            result.append("-unknown-")
+    CACHE[cache_key] = result
+    yield result
+
+
+@pytest.fixture(scope="session")
+def pdhf_docker_compose_secure(
+    docker_compose_files: List[str], tmp_path_factory: TempPathFactory
+) -> Generator[Path, None, None]:
+    """
+    Provides the location of the templated docker-compose configuration file containing the secure haproxy
+    service.
+    """
+    for lst in _pdhf_docker_compose_secure(
+        docker_compose_files=docker_compose_files,
+        scale_factor=1,
+        tmp_path_factory=tmp_path_factory,
+    ):
+        yield lst[0]
+
+
+@pytest.fixture(scope="session")
+def pdhf_docker_compose_secure_list(
+    docker_compose_files: List[str],
+    pdhf_scale_factor: int,
+    tmp_path_factory: TempPathFactory,
+) -> Generator[List[Path], None, None]:
+    """
+    Provides the location of the templated docker-compose configuration file containing the secure haproxy
+    service.
+    """
+    yield from _pdhf_docker_compose_secure(
+        docker_compose_files=docker_compose_files,
+        scale_factor=pdhf_scale_factor,
+        tmp_path_factory=tmp_path_factory,
+    )
 
 
 @pytest.fixture(scope="session")

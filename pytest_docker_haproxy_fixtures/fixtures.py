@@ -523,7 +523,6 @@ def _haproxy_insecure(
                     # Note: Needed to correctly populate the embedded, consolidated, service template ...
                     "PATH_CERTIFICATE": "/dev/null",
                     "PATH_HAPROXYCFG": haproxy_haproxycfg_insecure_list[i],
-                    "PATH_HTPASSWD": "/dev/null",
                     "PATH_KEY": "/dev/null",
                 }
             ),

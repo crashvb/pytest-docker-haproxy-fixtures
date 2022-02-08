@@ -60,15 +60,15 @@ $ python -m pip install --editable .[dev]
 
 ### <a name="haproxy_auth_header"></a> haproxy_auth_header
 
-Retrieves an HTTP basic authentication header that is populated with credentials that can access the secure docker haproxy service. The credentials are retrieved from the [haproxy_password](#haproxy_password) and [haproxy_username](#haproxy_username) fixtures. This fixture is used to replicate docker images into the secure docker haproxy service.
+Retrieves an HTTP basic authentication header that is populated with credentials that can access the secure haproxy service. The credentials are retrieved from the [haproxy_password](#haproxy_password) and [haproxy_username](#haproxy_username) fixtures. This fixture is used to replicate docker images into the secure haproxy service.
 
 ### <a name="haproxy_cacerts"></a> haproxy_cacerts
 
-Locates a user-defined CA trust store (<tt>tests/cacerts</tt>) to use to verify connections to the secure docker haproxy service. If one cannot be located, a temporary trust store is created containing certificates from <tt>certifi</tt> and the [haproxy_certs](#haproxy_certs) fixture. This fixture is used to instantiate the secure docker haproxy service.
+Locates a user-defined CA trust store (<tt>tests/cacerts</tt>) to use to verify connections to the secure haproxy service. If one cannot be located, a temporary trust store is created containing certificates from <tt>certifi</tt> and the [haproxy_certs](#haproxy_certs) fixture. This fixture is used to instantiate the secure haproxy service.
 
 ### <a name="haproxy_certs"></a> haproxy_certs
 
-Returns the paths of the self-signed certificate authority certificate, certificate, and private key that are used by the secure docker haproxy service. This fixture is used to instantiate the secure docker haproxy service.
+Returns the paths of the self-signed certificate authority certificate, certificate, and private key that are used by the secure haproxy service. This fixture is used to instantiate the secure haproxy service.
 
 #### NamedTuple Fields
 
@@ -83,15 +83,15 @@ Typing is provided by `pytest_docker_haproxy_fixtures.HAProxyCerts`.
 
 ### <a name="haproxy_haproxycfg_insecure"></a> haproxy_haproxycfg_insecure
 
-Provides the path to an insecure haproxy.cfg file that is used by the insecure docker haproxy service. If a user-defined haproxy.cfg file (<tt>tests/haproxy.insecure.cfg</tt>) can be located, it is used. Otherwise, an embedded configuration is copied to a temporary location and returned. This fixture is used to instantiate the insecure docker haproxy service.
+Provides the path to an insecure haproxy.cfg file that is used by the insecure haproxy service. If a user-defined haproxy.cfg file (<tt>tests/haproxy.insecure.cfg</tt>) can be located, it is used. Otherwise, an embedded configuration is copied to a temporary location and returned. This fixture is used to instantiate the insecure haproxy service.
 
 ### <a name="haproxy_haproxycfg_secure"></a> haproxy_haproxycfg_secure
 
-Provides the path to a secure haproxy.cfg file that is used by the secure docker haproxy service. If a user-defined haproxy.cfg file (<tt>tests/haproxy.secure.cfg</tt>) can be located, it is used. Otherwise, an embedded configuration is copied to a temporary location and returned. This fixture is used to instantiate the secure docker haproxy service. The configuration will be treated as a template; the <tt>$PASSWORD</tt> and <tt>$USERNAME</tt> tokens will be populated with values provided by the [haproxy_password](#haproxy_password) and [haproxy_username](#haproxy_username) fixtures, as appropriate.
+Provides the path to a secure haproxy.cfg file that is used by the secure haproxy service. If a user-defined haproxy.cfg file (<tt>tests/haproxy.secure.cfg</tt>) can be located, it is used. Otherwise, an embedded configuration is copied to a temporary location and returned. This fixture is used to instantiate the secure haproxy service. The configuration will be treated as a template; the <tt>$PASSWORD</tt> and <tt>$USERNAME</tt> tokens will be populated with values provided by the [haproxy_password](#haproxy_password) and [haproxy_username](#haproxy_username) fixtures, as appropriate.
 
 ### <a name="haproxy_insecure"></a> haproxy_insecure
 
-Configures and instantiates a docker haproxy without TLS or authentication.
+Configures and instantiates a haproxy service without TLS or authentication.
 
 ```python
 import requests
@@ -107,18 +107,19 @@ def test_haproxy_insecure(haproxy_insecure: HAProxyInsecure):
 The following fields are defined in the tuple provided by this fixture:
 
 * **docker_compose** - Path to the fully instantiated docker-compose configuration.
-* **endpoint** - Endpoint of the insecure docker haproxy service.
+* **endpoint** - Endpoint of the insecure haproxy service.
+* **endpoint_name** - Endpoint of the insecure haproxy service, by server name.
 * **service_name** - Name of the service within the docker-compose configuration.
 
 Typing is provided by `pytest_docker_haproxy_fixtures.HAProxyInsecure`.
 
 ### <a name="haproxy_password"></a> haproxy_password
 
-Provides a generated password to use for authentication to the secure docker haproxy service. This fixture is used to replicate docker images into the secure docker haproxy service.
+Provides a generated password to use for authentication to the secure haproxy service. This fixture is used to replicate docker images into the secure haproxy service.
 
 ### <a name="haproxy_secure"></a> haproxy_secure
 
-Configures and instantiates a TLS enabled docker haproxy with HTTP basic authorization.
+Configures and instantiates a TLS enabled haproxy service with HTTP basic authorization.
 
 ```python
 import requests
@@ -141,7 +142,8 @@ The following fields are defined in the tuple provided by this fixture:
 * **cacerts** - from [haproxy_cacerts](#haproxy_cacerts).
 * **certs** - from [haproxy_certs](#haproxy_certs).
 * **docker_compose** - Path to the fully instantiated docker-compose configuration.
-* **endpoint** - Endpoint of the secure docker haproxy service.
+* **endpoint** - Endpoint of the secure haproxy service.
+* **endpoint_name** - Endpoint of the secure haproxy service, by server name.
 * **password** - from [haproxy_password](#haproxy_password).
 * **service_name** - Name of the service within the docker-compose configuration.
 * **ssl_context** - from [haproxy_ssl_context](#haproxy_ssl_context).
@@ -151,19 +153,19 @@ Typing is provided by `pytest_docker_haproxy_fixtures.HAProxySecure`.
 
 ### <a name="haproxy_ssl_context"></a> haproxy_ssl_context
 
-Provides an SSL context containing the CA trust store from the  [haproxy_cacerts](#haproxy_cacerts) fixture. This fixture is used to instantiate the secure docker haproxy service.
+Provides an SSL context containing the CA trust store from the  [haproxy_cacerts](#haproxy_cacerts) fixture. This fixture is used to instantiate the secure haproxy service.
 
 ### <a name="haproxy_username"></a> haproxy_username
 
-Provides a generated username to use for authentication to the secure docker haproxy service. This fixture is used to replicate docker images into the secure docker haproxy service.
+Provides a generated username to use for authentication to the secure haproxy service. This fixture is used to replicate docker images into the secure haproxy service.
 
 ### <a name="pdhf_docker_compose_insecure"></a> pdhf_docker_compose_insecure
 
-This fixture uses the `docker_compose_files` fixture to locate a user-defined docker-compose configuration file (typically <tt>tests/docker-compose.yml</tt>) that contains the <tt>pytest-docker-haproxy-insecure</tt> service. If one cannot be located, an embedded configuration is copied to a temporary location and returned. This fixture is used to instantiate the insecure docker haproxy service. The configuration will be treated as a template; the <tt>$PATH_HAPROXYCFG</tt> token will be populated with the absolute path provided by the [haproxy_haproxycfg](#haproxy_haproxycfg) fixture.
+This fixture uses the `docker_compose_files` fixture to locate a user-defined docker-compose configuration file (typically <tt>tests/docker-compose.yml</tt>) that contains the <tt>pytest-docker-haproxy-insecure</tt> service. If one cannot be located, an embedded configuration is copied to a temporary location and returned. This fixture is used to instantiate the insecure haproxy service. The configuration will be treated as a template; the <tt>$PATH_HAPROXYCFG</tt> token will be populated with the absolute path provided by the [haproxy_haproxycfg](#haproxy_haproxycfg) fixture.
 
 ### <a name="pdhf_docker_compose_secure"></a> pdhf_docker_compose_secure
 
-This fixture uses the `docker_compose_files` fixture to locate a user-defined docker-compose configuration file (typically <tt>tests/docker-compose.yml</tt>) that contains the <tt>pytest-docker-haproxy-secure</tt> service. If one cannot be located, an embedded configuration is copied to a temporary location and returned. This fixture is used to instantiate the secure docker haproxy service. The configuration will be treated as a template; the <tt>$PATH_CERTIFICATE</tt>, <tt>$PATH_HAPROXYCFG</tt>, and <tt>$PATH_KEY</tt> tokens will be populated with the absolute paths provided by the [haproxy_certs](#haproxy_certs) and [haproxy_haproxycfg](#haproxy_haproxycfg) fixtures, as appropriate.
+This fixture uses the `docker_compose_files` fixture to locate a user-defined docker-compose configuration file (typically <tt>tests/docker-compose.yml</tt>) that contains the <tt>pytest-docker-haproxy-secure</tt> service. If one cannot be located, an embedded configuration is copied to a temporary location and returned. This fixture is used to instantiate the secure haproxy service. The configuration will be treated as a template; the <tt>$PATH_CERTIFICATE</tt>, <tt>$PATH_HAPROXYCFG</tt>, and <tt>$PATH_KEY</tt> tokens will be populated with the absolute paths provided by the [haproxy_certs](#haproxy_certs) and [haproxy_haproxycfg](#haproxy_haproxycfg) fixtures, as appropriate.
 
 ## <a name="enumerated_fixtures"></a>Enumerated Fixtures
 

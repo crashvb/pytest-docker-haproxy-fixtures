@@ -28,6 +28,8 @@ from .utils import (
     get_docker_compose_user_defined,
     get_embedded_file,
     get_user_defined_file,
+    HAPROXY_PORT_INSECURE,
+    HAPROXY_PORT_SECURE,
     HAPROXY_SERVICE,
     HAPROXY_SERVICE_PATTERN,
     start_service,
@@ -53,6 +55,7 @@ class HAProxyInsecure(NamedTuple):
     # pylint: disable=missing-class-docstring
     docker_compose: Path
     endpoint: str
+    endpoint_name: str
     service_name: str
 
 
@@ -64,6 +67,7 @@ class HAProxySecure(NamedTuple):
     certs: HAProxyCerts
     docker_compose: Path
     endpoint: str
+    endpoint_name: str
     password: str
     service_name: str
     ssl_context: SSLContext
@@ -409,6 +413,7 @@ def _haproxy_insecure(
             docker_services,
             check_server=check_server,
             docker_compose=path_docker_compose,
+            private_port=HAPROXY_PORT_INSECURE,
             service_name=service_name,
         )
         LOGGER.debug("Insecure haproxy endpoint [%d]: %s", i, endpoint)
@@ -417,6 +422,7 @@ def _haproxy_insecure(
             HAProxyInsecure(
                 docker_compose=path_docker_compose,
                 endpoint=endpoint,
+                endpoint_name=f"{service_name}:{HAPROXY_PORT_INSECURE}",
                 service_name=service_name,
             )
         )
@@ -489,6 +495,7 @@ def haproxy_password_list(pdhf_scale_factor: int) -> List[str]:
 def _haproxy_secure(
     *,
     docker_compose_secure_list: List[Path],
+    docker_services: Services,
     haproxy_auth_header_list: List[Dict[str, str]],
     haproxy_cacerts_list: List[Path],
     haproxy_certs_list: List[HAProxyCerts],
@@ -496,7 +503,6 @@ def _haproxy_secure(
     haproxy_password_list: List[str],
     haproxy_ssl_context_list: List[SSLContext],
     haproxy_username_list: List[str],
-    docker_services: Services,
     scale_factor: int,
     tmp_path_factory: TempPathFactory,
 ) -> Generator[List[HAProxySecure], None, None]:
@@ -545,6 +551,7 @@ def _haproxy_secure(
             docker_services,
             check_server=check_server,
             docker_compose=path_docker_compose,
+            private_port=HAPROXY_PORT_SECURE,
             service_name=service_name,
         )
         LOGGER.debug("Secure haproxy endpoint [%d]: %s", i, endpoint)
@@ -556,6 +563,7 @@ def _haproxy_secure(
                 certs=haproxy_certs_list[i],
                 docker_compose=path_docker_compose,
                 endpoint=endpoint,
+                endpoint_name=f"{service_name}:{HAPROXY_PORT_SECURE}",
                 password=haproxy_password_list[i],
                 service_name=service_name,
                 ssl_context=haproxy_ssl_context_list[i],

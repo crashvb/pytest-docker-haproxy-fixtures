@@ -22,6 +22,8 @@ from lovely.pytest.docker.compose import Services
 
 LOGGER = logging.getLogger(__name__)
 
+HAPROXY_PORT_INSECURE = 8080
+HAPROXY_PORT_SECURE = 8080
 HAPROXY_SERVICE = "pytest-haproxy"
 HAPROXY_SERVICE_PATTERN = f"{HAPROXY_SERVICE}-{{0}}-{{1}}"
 
@@ -154,7 +156,7 @@ def generate_haproxycfg(
 
 
 def generate_keypair(
-    *, keysize: int = 4096, life_cycle: int = 7 * 24 * 60 * 60
+    *, keysize: int = 4096, life_cycle: int = 7 * 24 * 60 * 60, service_name: str = None
 ) -> CertificateKeypair:
     """
     Generates a keypair and certificate for the secure haproxy service.
@@ -162,6 +164,7 @@ def generate_keypair(
     Args:
         keysize: size of the private key.
         life_cycle: Lifespan of the generated certificates, in seconds.
+        service_name: Name of the service to be added as a SAN.
 
     Returns:
         tuple:
@@ -212,6 +215,7 @@ def generate_keypair(
     x509_cert.set_serial_number(randrange(100000))
     x509_cert.set_version(2)
 
+    service_name = [f"DNS:{service_name}"] if service_name else []
     x509_cert.add_extensions(
         [
             crypto.X509Extension(b"basicConstraints", False, b"CA:FALSE"),
@@ -225,7 +229,7 @@ def generate_keypair(
                         f"DNS:*.{getfqdn()}",
                         "DNS:localhost",
                         "DNS:*.localhost",
-                        "DNS:*",
+                        *service_name,
                         "IP:127.0.0.1",
                     ]
                 ).encode("utf-8"),
@@ -306,6 +310,7 @@ def start_service(
     docker_services: Services,
     *,
     docker_compose: Path,
+    private_port: int,
     service_name: str,
     **kwargs,
 ):
@@ -316,6 +321,7 @@ def start_service(
     Args:
         docker_services: lovely service to use to start the service.
         docker_compose: Path to the docker-compose configuration file (to be injected).
+        private_port: The private port to which the service is bound.
         service_name: Name of the service, within the docker-compose configuration, to be instantiated.
     """
     # DUCK PUNCH: Don't get in the way of user-defined lovey/pytest/docker/compose.py::docker_compose_files()
@@ -327,7 +333,7 @@ def start_service(
 
     public_port = docker_services.wait_for_service(
         pause=3,
-        private_port=8080,
+        private_port=private_port,
         service=service_name,
         **kwargs,
     )

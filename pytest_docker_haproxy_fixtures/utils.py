@@ -326,10 +326,22 @@ def start_service(
     """
     # DUCK PUNCH: Don't get in the way of user-defined lovey/pytest/docker/compose.py::docker_compose_files()
     #             overrides ...
-    docker_services._docker_compose._compose_files = [
-        str(docker_compose)
-    ]  # pylint: disable=protected-access
+
+    # Copy the original list appending our service(s). It should be assumed that all files in the list before we got
+    # here should already exist. If they don't, docker-compose doesn't handle "-f <dne>" very well ...
+    compose_files = [
+        *docker_services._docker_compose._compose_files,
+        str(docker_compose),
+    ]
+    compose_files = [file for file in compose_files if Path(file).exists()]
+
+    # Stomp the list so that only our service(s) are started ...
+    docker_services._docker_compose._compose_files = [str(docker_compose)]
     docker_services.start(service_name)
+
+    # Assign the augmented list so that docker compose does not complain about orphans when stopping services during
+    # teardown.
+    docker_services._docker_compose._compose_files = compose_files
 
     public_port = docker_services.wait_for_service(
         pause=3,

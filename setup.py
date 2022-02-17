@@ -50,6 +50,10 @@ setup(
     package_data={
         "pytest_docker_haproxy_fixtures": ["docker-compose*.yml", "haproxy.*.cfg"]
     },
+    project_urls={
+        "Bug Reports": "https://github.com/crashvb/pytest-docker-haproxy-fixtures/issues",
+        "Source": "https://github.com/crashvb/pytest-docker-haproxy-fixtures",
+    },
     test_suite="tests",
     tests_require=["urllib3"],
     url="https://github.com/crashvb/pytest-docker-haproxy-fixtures",

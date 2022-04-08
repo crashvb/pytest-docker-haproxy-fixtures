@@ -1,5 +1,13 @@
 # pytest-docker-haproxy-fixtures
 
+[![pypi version](https://img.shields.io/pypi/v/pytest-docker-haproxy-fixtures.svg)](https://pypi.org/project/pytest-docker-haproxy-fixtures)
+[![build status](https://github.com/crashvb/pytest-docker-haproxy-fixtures/actions/workflows/main.yml/badge.svg)](https://github.com/crashvb/pytest-docker-haproxy-fixtures/actions)
+[![coverage status](https://coveralls.io/repos/github/crashvb/pytest-docker-haproxy-fixtures/badge.svg)](https://coveralls.io/github/crashvb/pytest-docker-haproxy-fixtures)
+[![python versions](https://img.shields.io/pypi/pyversions/pytest-docker-haproxy-fixtures.svg?logo=python&logoColor=FBE072)](https://pypi.org/project/pytest-docker-haproxy-fixtures)
+[![linting](https://img.shields.io/badge/linting-pylint-yellowgreen)](https://github.com/PyCQA/pylint)
+[![code style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![license](https://img.shields.io/github/license/crashvb/pytest-docker-haproxy-fixtures.svg)](https://github.com/crashvb/pytest-docker-haproxy-fixtures/blob/master/LICENSE)
+
 ## Overview
 
 Pytest fixtures to instantiate and utilize local haproxy docker containers, using [lovely-pytest-docker](https://pypi.org/project/lovely-pytest-docker) and [docker-py](https://pypi.org/project/docker-py), for testing.
@@ -35,9 +43,6 @@ def test_haproxy_insecure(haproxy_insecure: HAProxyInsecure):
 ```
 
 The `push_image` mark can optionally be added to stage images in the haproxy prior to testing. See [Markers](#markers) for details.
-## Compatibility
-
-* Tested with python 3.8
 
 ## Installation
 ### From [pypi.org](https://pypi.org/project/pytest-docker-haproxy-fixtures/)

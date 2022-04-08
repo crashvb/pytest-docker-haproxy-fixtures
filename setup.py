@@ -25,13 +25,26 @@ setup(
         "Intended Audience :: Developers",
         "License :: OSI Approved :: Apache Software License",
         "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
         "Operating System :: OS Independent",
     ],
     description="Pytest fixtures for testing with haproxy.",
     entry_points={
         "pytest11": ["docker_haproxy_fixtures = pytest_docker_haproxy_fixtures"]
     },
-    extras_require={"dev": ["black", "pylint", "twine", "wheel"]},
+    extras_require={
+        "dev": [
+            "black",
+            "coveralls",
+            "pylint",
+            "pytest",
+            "pytest-cov",
+            "twine",
+            "wheel",
+        ]
+    },
     include_package_data=True,
     install_requires=[
         "bcrypt",
@@ -42,7 +55,7 @@ setup(
         "pytest",
     ],
     keywords="docker fixtures haproxy pytest",
-    license="GNU General Public License v3.0",
+    license="Apache License 2.0",
     long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
     name="pytest_docker_haproxy_fixtures",
@@ -54,8 +67,8 @@ setup(
         "Bug Reports": "https://github.com/crashvb/pytest-docker-haproxy-fixtures/issues",
         "Source": "https://github.com/crashvb/pytest-docker-haproxy-fixtures",
     },
+    tests_require=["pytest", "urllib3"],
     test_suite="tests",
-    tests_require=["urllib3"],
     url="https://github.com/crashvb/pytest-docker-haproxy-fixtures",
     version=find_version("pytest_docker_haproxy_fixtures", "__init__.py"),
 )

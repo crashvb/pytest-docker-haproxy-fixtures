@@ -6,7 +6,7 @@
 [![python versions](https://img.shields.io/pypi/pyversions/pytest-docker-haproxy-fixtures.svg?logo=python&logoColor=FBE072)](https://pypi.org/project/pytest-docker-haproxy-fixtures)
 [![linting](https://img.shields.io/badge/linting-pylint-yellowgreen)](https://github.com/PyCQA/pylint)
 [![code style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![license](https://img.shields.io/github/license/crashvb/pytest-docker-haproxy-fixtures.svg)](https://github.com/crashvb/pytest-docker-haproxy-fixtures/blob/master/LICENSE)
+[![license](https://img.shields.io/github/license/crashvb/pytest-docker-haproxy-fixtures.svg)](https://github.com/crashvb/pytest-docker-haproxy-fixtures/blob/master/LICENSE.md)
 
 ## Overview
 

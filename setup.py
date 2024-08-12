@@ -49,7 +49,7 @@ setup(
     install_requires=[
         "bcrypt",
         "certifi",
-        "docker-compose",
+        "docker",
         "lovely-pytest-docker",
         "pyopenssl",
         "pytest",
